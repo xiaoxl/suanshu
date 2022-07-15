@@ -6,6 +6,21 @@ from datetime import datetime
 import os
 import re
 
+from sympy import Q
+
+
+def randomsample(plist, numofselections):
+    NN = len(plist)
+    qq = numofselections // NN
+    rr = numofselections - NN * qq
+    rlist = random.sample(plist, rr)
+    return plist * qq + rlist
+
+# %%
+# pl = [1,2,3,4,5,6]
+# rl = randomsample(pl, 15)
+# print(rl)
+
 # %%
 # upper bound for the operations
 Nadd = 100
@@ -54,13 +69,10 @@ NTminus = math.floor(N * Tminus / T)
 NTtimes = math.floor(N * Ttimes / T)
 NTq = N - NTadd - NTminus - NTtimes
 
-if NTadd >= len(qadd):
-    plistadd = random.choices(qadd, k=NTadd)
-else:
-    plistadd = random.choices(qadd, k=NTadd)
-plistminus = random.choices(qminus, k=NTminus, replace=False)
-plisttimes = random.choices(qtimes, k=NTtimes, replace=False)
-plistq = random.choices(qq, k=NTq, replace=False)
+plistadd = randomsample(qadd, NTadd)
+plistminus = randomsample(qminus, NTminus)
+plisttimes = randomsample(qtimes, NTtimes)
+plistq = randomsample(qq, NTq)
 plist = plistadd + plistminus + plisttimes + plistq
 random.shuffle(plist)
 
