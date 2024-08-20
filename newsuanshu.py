@@ -2,6 +2,7 @@
 import matplotlib.pyplot as plt
 import random, os, re
 from datetime import datetime
+from pathlib import Path
 
 
 def renderlatex(expr):
@@ -53,6 +54,7 @@ def genqvault(qtemplates):
                 flag = 0
                 if int(answer) != answer:
                     flag = 1
+                    # pass
                 if amin is not None:
                     if answer < amin:
                         flag = 1
@@ -88,21 +90,29 @@ def genproblemlist(qlist, qdlist, totalnum):
 # %%
 #  configuration
 qtemplates = r'''
-(10,99)+(10,99)      @ 1     &    (0,)   
-(0,100)-(0,100)      @ 0     & (0,)
-(0,10)*(0,10)        @ 0     & (,)
-(0,100)/(1,10)       @ 0     & (10,100)
+(10,99)*(10,99)      @ 0     &    (0,)   
+(10,99)*(100,999)      @ 0     & (0, )
+(1,10)+(10,99)      @ 0     & (0, 99)
+(10,99)-(1,99)      @ 0     & (0, )
+(10,99)-(1,9)        @ 0     & (0,100)
+(10,89)+(1,9)        @ 0     & (0,100)
+(10,99)+(1,49)        @ 1     & (0,100)
+(10,99)-(1,49)        @ 1     & (0,100)
+(10,999)/(3,10)       @ 0     & (,)
+(0,100)/(1,10)       @ 0     & (1,1)
 '''
 pattern = r"\((\d+?),(\d+?)\)(.+?)\((\d+?),(\d+?)\)"
 
 qlist, qdlist = genqvault(qtemplates)
+
+
 # %%
 Ncol = 4
 Nrow = 7
 fontsize = 10
 # positions to print problems
 colModifier = 0.03
-rowModifier = 0.12
+rowModifier = 0.15
 
 ####################################
 collist = [c/Ncol + colModifier for c in range(Ncol)]
@@ -129,4 +139,6 @@ if not os.path.isdir(assfolder+fdatepath):
 fname = now.strftime('%H%M%S.png')
 plt.savefig(assfolder+fdatepath+fname, pad_inches=0, format='png',
             bbox_inches='tight')
+# %%
+
 # %%
