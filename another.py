@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import random, os, re
 from datetime import datetime
 from pathlib import Path
+import numpy as np
 
 
 def renderlatex(expr):
@@ -29,7 +30,7 @@ def lastnonzero(ls):
     return ind
 
 
-def genqvault(qtemplates, N=10):
+def genqvault(qtemplates, N=10, random=True):
     qtlist = qtemplates.split('\n')
     qtlist = [x for x in qtlist if x != ""]
     qlist = list()
@@ -76,6 +77,7 @@ def genqvault(qtemplates, N=10):
                 flag = 0
             plist.append(prob)
     # print(qclist)
+    np.random.shuffle(plist)
     return plist
 
 
@@ -134,20 +136,27 @@ def generateq(ptem):
 # [1,30]-([1,30]+[1,30])    @1   & (0,)
 # [1,30]-([1,30]-[1,30])    @1   & (0,)
 # '''
-qtemplates = r'''
-[2,10]*[2,10]    @2   & (0,)
-[1,10]*[1,10]    @1   & (0,)
-'''
+# qtemplates = r'''
+# [2,10]*[2,10]    @2   & (0,)
+# [1,10]*[1,10]    @1   & (0,)
+# '''
 # qtemplates = r'''
 # [1,99] / [1,10]  @1 &(0,10)
 # '''
 
-# qtemplates = r'''
-# [10,40] + [1,9]*[1,9]  @1 &(0,)
-# [1,9]*[1,9]+[10,40]   @1 &(0,)
-# [10,40] - [1,9]*[1,9]  @1 &(0,)
-# [1,9]*[1,9]-[10,40]   @1 &(0,)
-# '''
+
+
+
+qtemplates = r'''
+[1,9] + [1,9]*[1,9]  @1 &(0,)
+[1,9]*[1,9]+[10,40]   @1 &(0,)
+[1,9] - [1,9]*[1,9]  @1 &(0,)
+[1,9]*[1,9]-[1,9]   @1 &(0,)
+([1,9] + [1,9])*[1,9]  @1 &(0,)
+[1,9]*([1,9]+[1,9])   @1 &(0,)
+([1,9] - [1,9])*[1,9]  @1 &(0,)
+[1,9]*([1,9]-[1,9])   @1 &(0,)
+'''
 
 pattern = r"\((\d+?),(\d+?)\)(.+?)\((\d+?),(\d+?)\)"
 
@@ -160,7 +169,7 @@ Nrow = 8
 fontsize = 10
 # positions to print problems
 colModifier = 0.03
-rowModifier = 0.15
+rowModifier = 0.1
 
 ####################################
 collist = [c/Ncol + colModifier for c in range(Ncol)]
