@@ -102,14 +102,73 @@ def replacenumber(qtem):
 
 
 def generateq(ptem):
-    tp = r'\[\d+?,\d+?\]'
-    return re.sub(tp, replacenumber, ptem)
+    # tp = r'\[\d+?,\d+?\]'
+    # return re.sub(tp, replacenumber, ptem)
+    numdict = random_pattern(num_pattern)
 
+    pattern = re.compile("|".join(re.escape(k) for k in numdict))
+
+    # Replace using a lambda that looks up each match in the dictionary
+    result = pattern.sub(lambda m: numdict[m.group(0)], ptem)
+    return result
+
+def random_pattern(num_pattern, N=100):
+    nums = [num for num in num_pattern.split('\n') if len(num)!=0]
+    numdict = {}
+    for num in nums:
+        v, l, h = re.findall(r'(\w+)=\[(\d+?),(\d+?)\]', num)[0]
+        numdict[v]=str(random.randint(int(l), int(h)))
+        numdict['b'+v] = str(N-int(numdict[v]))
+    return numdict
 
 
 
 # %%
 #  configuration
+num_pattern = r'''
+A1=[1,9]
+A2=[1,99]
+B1=[1,9]
+B2=[1,99]
+C1=[1,9]
+C2=[1,99]
+'''
+
+# qtemplates_v2 = r'''
+# (A2-B2)-C2 @1 &(0,)
+# (A2-B2)+C2 @1 &(0,)
+# (A2+B2)-C2 @1 &(0,)
+# (A2+B2)+C2 @1 &(0,)
+# C2-(A2-B2) @1 &(0,)
+# C2+(A2-B2) @1 &(0,)
+# C2-(A2+B2) @1 &(0,)
+# C2+(A2+B2) @1 &(0,)
+# A2+B2+C2 @1 &(0,)
+# A2+B2-C2 @1 &(0,)
+# A2-B2+C2 @1 &(0,)
+# A2-B2-C2 @1 &(0,)
+# '''
+
+
+qtemplates_v2 = r'''
+(A2-B2)*C2 @1 &(0,)
+(A2+A2)*C2 @1 &(0,)
+C2*(A2-B2) @1 &(0,)
+C2*(A2+B2) @1 &(0,)
+A2*C2+B2*C2 @1 &(0,)
+A2*C2-B2*C2  @1 &(0,)
+C2*A2+B2*C2 @1 &(0,)
+C2*A2-B2*C2  @1 &(0,)
+A2*C2+A2*B2 @1 &(0,)
+A2*C2-A2*B2  @1 &(0,)
+C2*A2+A2*B2 @1 &(0,)
+C2*A2-A2*B2  @1 &(0,)
+A2*C2+bA2*C2 @2 &(0,)
+A2*C2+C2*bA2 @1 &(0,)
+C2*A2+bA2*C2 @2 &(0,)
+C2*A2+C2*bA2 @1  &(0,)
+'''
+
 # qtemplates = r'''
 # ([10,99]*[10,99]) +[1,10]     @ 0     &    (0,)
 # [10,99]*[100,999]      @ 0     & (0, )
@@ -151,7 +210,7 @@ Nrow = 8
 fontsize = 10
 # positions to print problems
 colModifier = 0.03
-rowModifier = 0.15
+rowModifier = 0.1
 
 ####################################
 collist = [c/Ncol + colModifier for c in range(Ncol)]
@@ -160,7 +219,7 @@ totalnum = Ncol * Nrow
 
 #################### get problem list
 # plist = genproblemlist(qlist, qdlist, totalnum=totalnum)
-plist = genqvault(qtemplates, Ncol*Nrow)
+plist = genqvault(qtemplates_v2, Ncol*Nrow)
 ################# print
 fig, ax = plt.subplots(figsize=(8.5, 11), dpi=300)
 for i in range(Nrow):
