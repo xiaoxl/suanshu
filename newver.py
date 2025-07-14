@@ -38,7 +38,6 @@ def genqvault(qtemplates, N=10):
     qclist = list()
     plist = list()
     M = len(qtlist)
-    # qqdlist = list()
     for qtype in qtlist:
         qp, qd = qtype.split("@")
         qd, qc = qd.split("&")
@@ -53,20 +52,9 @@ def genqvault(qtemplates, N=10):
         qdlist.append(qd)
         qlist.append(qp)
         qclist.append((amin, amax))
-        # if int(qd) != 0:
-        #     qlist.append(qp)
-        #     qdlist.append(qd)
-        #     qclist.append((amin, amax))
-    # rqdlist1 = [int(d) for d in qdlist]
-    # rqdlist = [int(d/sum(rqdlist1)*N) for d in rqdlist1]
-    # rqdlist[-1] = rqdlist[-1] + N - sum(rqdlist)
     qdlist = np.array(qdlist, dtype=int)
     pp = qdlist/qdlist.sum()
-    # print(qdlist, pp)
-    # print(qclist)
     rqdlist = np.random.choice(list(range(M)), size=N, p=pp)
-    # print(len(qlist))
-    # print(rqdlist)
 
     for i in range(M):
         amin = qclist[i][0]
