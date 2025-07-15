@@ -54,27 +54,30 @@ def genqvault(qtemplates, N=10):
         qclist.append((amin, amax))
     qdlist = np.array(qdlist, dtype=int)
     pp = qdlist/qdlist.sum()
+    # print(pp)
     rqdlist = np.random.choice(list(range(M)), size=N, p=pp)
-
-    for i in range(M):
+    # print(rqdlist)
+    # print(qlist)
+    for i in rqdlist:
         amin = qclist[i][0]
         amax = qclist[i][1]
-        for j in range(rqdlist[i]):
-            flag = 1
-            while (flag):
-                prob = generateq(qlist[i])
-                ans = eval(prob)
-                if (ans != int(ans)):
+        # for _ in range(N):
+        flag = 1
+        while (flag):
+            prob = generateq(qlist[i])
+            ans = eval(prob)
+            if (ans != int(ans)):
+                continue
+            if amin is not None:
+                if ans < amin:
                     continue
-                if amin is not None:
-                    if ans < amin:
-                        continue
-                if amax is not None:
-                    if ans > amax:
-                        continue
-                flag = 0
-            plist.append(prob)
-    # print(qclist)
+            if amax is not None:
+                if ans > amax:
+                    continue
+            flag = 0
+        plist.append(prob)
+        # print(i, qlist[i], prob)
+    # print(plist)
     return plist
 
 
@@ -141,49 +144,59 @@ def random_pattern(num_pattern):
 num_pattern = r'''
 A1=random.randint(1,9)
 A2=random.randint(10,99)
-bA2=100-A2
 B1=random.randint(1,9)
 B2=random.randint(10,99)
 B3=10-B1
 C1=random.randint(1,9)
 C2=random.randint(10,99)
+bA2=C1*10-A2 if C1*10>A2 else C1*100-A2
+bA3=C1*10+A2
 '''
 
-qtemplates_v2 = r'''
-(A1-B1)-C1 @1 &(0,)
-(A1-B1)+C1 @1 &(0,)
-(A1+B1)-C1 @1 &(0,)
-(A1+B1)+C1 @1 &(0,)
-C1-(A1-B1) @1 &(0,)
-C1+(A1-B1) @1 &(0,)
-C1-(A1+B1) @1 &(0,)
-C1+(A1+B1) @1 &(0,)
-A1+B1+C1 @1 &(0,)
-A1+B1-C1 @1 &(0,)
-A1-B1+C1 @1 &(0,)
-A1-B1-C1 @1 &(0,)
-'''
+# qtemplates_v2 = r'''
+# (A1-B1)-C1 @1 &(0,)
+# (A1-B1)+C1 @1 &(0,)
+# (A1+B1)-C1 @1 &(0,)
+# (A1+B1)+C1 @1 &(0,)
+# C1-(A1-B1) @1 &(0,)
+# C1+(A1-B1) @1 &(0,)
+# C1-(A1+B1) @1 &(0,)
+# C1+(A1+B1) @1 &(0,)
+# A1+B1+C1 @1 &(0,)
+# A1+B1-C1 @1 &(0,)
+# A1-B1+C1 @1 &(0,)
+# A1-B1-C1 @1 &(0,)
+# '''
 
 # qtemplates_v2 = r'''
 # A2/B1 @1 &(0,)
 # A1*B1 @1 &(0,)
 # '''
 
+qtemplates_v2 = r'''
+(A2-B2)-C2 @1 &(0,)
+(A2-B2)+C2 @1 &(0,)
+(A2+B2)-C2 @1 &(0,)
+(A2+B2)+C2 @1 &(0,)
+C2-(A2-B2) @1 &(0,)
+C2+(A2-B2) @1 &(0,)
+C2-(A2+B2) @1 &(0,)
+C2+(A2+B2) @1 &(0,)
+A2+B2+C2 @1 &(0,)
+A2+B2-C2 @1 &(0,)
+A2-B2+C2 @1 &(0,)
+A2-B2-C2 @1 &(0,)
+'''
 # qtemplates_v2 = r'''
-# (A2-B2)-C2 @1 &(0,)
-# (A2-B2)+C2 @1 &(0,)
-# (A2+B2)-C2 @1 &(0,)
-# (A2+B2)+C2 @1 &(0,)
-# C2-(A2-B2) @1 &(0,)
-# C2+(A2-B2) @1 &(0,)
-# C2-(A2+B2) @1 &(0,)
-# C2+(A2+B2) @1 &(0,)
-# A2+B2+C2 @1 &(0,)
-# A2+B2-C2 @1 &(0,)
-# A2-B2+C2 @1 &(0,)
-# A2-B2-C2 @1 &(0,)
+# bA3*C2-A2*C2  @1 &(0,)
+# C2*bA3-A2*C2  @1 &(0,)
+# bA3*C2-C2*A2  @1 &(0,)
+# C2*bA3-C2*A2  @1 &(0,)
+# A2*C2+bA2*C2 @1 &(0,)
+# A2*C2+C2*bA2 @1 &(0,)
+# C2*A2+bA2*C2 @1 &(0,)
+# C2*A2+C2*bA2 @1 &(0,)
 # '''
-
 
 # qtemplates_v2 = r'''
 # (A2-B2)*C2 @1 &(0,)
@@ -198,10 +211,10 @@ A1-B1-C1 @1 &(0,)
 # A2*C2-A2*B2  @1 &(0,)
 # C2*A2+A2*B2 @1 &(0,)
 # C2*A2-A2*B2  @1 &(0,)
-# A2*C2+bA2*C2 @1 &(0,)
-# A2*C2+C2*bA2 @1 &(0,)
-# C2*A2+bA2*C2 @1 &(0,)
-# C2*A2+C2*bA2 @1  &(0,)
+# A2*C2+bA2*C2 @2 &(0,)
+# A2*C2+C2*bA2 @2 &(0,)
+# C2*A2+bA2*C2 @2 &(0,)
+# C2*A2+C2*bA2 @2 &(0,)
 # '''
 
 # qtemplates = r'''
@@ -259,6 +272,7 @@ plist = genqvault(qtemplates_v2, Ncol*Nrow)
 fig, ax = plt.subplots(figsize=(8.5, 11), dpi=300)
 for i in range(Nrow):
     for j in range(Ncol):
+        # print(plist[i*Ncol+j])
         ax.text(collist[j], rowlist[i], renderlatex(plist[i*Ncol+j])+"=",
                 fontsize=fontsize)
 plt.axis('off')
