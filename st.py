@@ -226,7 +226,7 @@ def get_next_template_number():
 # MAIN APP STARTS HERE
 # ============================================================================
 
-st.title("Math Pattern Generator")
+
 
 # Initialize session state
 # if "selected_template_name" not in st.session_state:
@@ -240,14 +240,24 @@ st.title("Math Pattern Generator")
 
 # if "template_saved" not in st.session_state:
 #     st.session_state.template_saved = False
-for key, default in {
-    "selected_template_name": "+ Create New Template",
-    "template_data": None,
-    "worksheets": [],
-    "template_saved": False,
-}.items():
-    if key not in st.session_state:
-        st.session_state[key] = default
+if "selected_template_name" not in st.session_state:
+    st.session_state.selected_template_name = "+ Create New Template"
+
+selected_template = st.selectbox(
+    "Select template", ["Template A", "Template B", "+ Create New Template"], key="selected_template_name"
+)
+
+# for key, default in {
+#     "selected_template_name": "+ Create New Template",
+#     "template_data": None,
+#     "worksheets": [],
+#     "template_saved": False,
+# }.items():
+#     if key not in st.session_state:
+#         st.session_state[key] = default
+
+
+st.title("Math Pattern Generator")
 
 # Load template data when selection changes
 if st.session_state.selected_template_name != st.session_state.get("last_selected_template"):
