@@ -229,17 +229,25 @@ def get_next_template_number():
 st.title("Math Pattern Generator")
 
 # Initialize session state
-if "selected_template_name" not in st.session_state:
-    st.session_state.selected_template_name = "+ Create New Template"
+# if "selected_template_name" not in st.session_state:
+#     st.session_state.selected_template_name = "+ Create New Template"
 
-if "template_data" not in st.session_state:
-    st.session_state.template_data = None
+# if "template_data" not in st.session_state:
+#     st.session_state.template_data = None
 
-if "worksheets" not in st.session_state:
-    st.session_state.worksheets = []
+# if "worksheets" not in st.session_state:
+#     st.session_state.worksheets = []
 
-if "template_saved" not in st.session_state:
-    st.session_state.template_saved = False
+# if "template_saved" not in st.session_state:
+#     st.session_state.template_saved = False
+for key, default in {
+    "selected_template_name": "+ Create New Template",
+    "template_data": None,
+    "worksheets": [],
+    "template_saved": False,
+}.items():
+    if key not in st.session_state:
+        st.session_state[key] = default
 
 # Load template data when selection changes
 if st.session_state.selected_template_name != st.session_state.get("last_selected_template"):
@@ -298,8 +306,12 @@ with st.sidebar:
     available_templates = get_available_templates()
     template_options = available_templates + ["+ Create New Template"]
     default_index = 0 if available_templates else len(template_options) - 1
-    selected_template = st.selectbox(
-        "Choose Template:", template_options, index=default_index, key="selected_template_name"
+
+    st.selectbox(
+        "Choose Template:",
+        template_options,
+        index=default_index,
+        key="selected_template_name"  # <- directly binds to session state
     )
 
     # if selected_template != st.session_state.get("selected_template_name"):
@@ -426,7 +438,7 @@ with col1:
                 st.error("Please check your number pattern and question templates for syntax errors.")
     with col21:
         if st.button("🔄 Refresh Templates"):
-            st.session_state.selected_template_name = "+ Create New Template"
+            st.session_state.update({"selected_template_name": "+ Create New Template"})
             st.rerun()
     with col31:
         try:
