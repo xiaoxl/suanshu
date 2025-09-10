@@ -236,40 +236,10 @@ if "template_data" not in st.session_state:
 if "template_saved" not in st.session_state:
     st.session_state.template_saved = False
 
-# Template switcher at the top
-st.markdown("### 📋 Template Manager")
-col1, col2 = st.columns([3, 1])
-
-with col1:
-    # Get available templates
-    available_templates = get_available_templates()
-    template_options = available_templates + ["+ Create New Template"]
-
-    # Set default selection
-    default_index = 0 if available_templates else len(template_options) - 1
-
-    selected_template = st.selectbox("Choose Template:", template_options, index=default_index, key="template_selector")
-
-with col2:
-    if st.button("🔄 Refresh Templates"):
-        st.session_state.selected_template_name = None
-        st.rerun()
-
-# with col3:
-#     # Set default value based on whether template was just saved
-#     default_name = "" if st.session_state.template_saved else f"template{get_next_template_number()}"
-#     new_template_name = st.text_input("New Template Name:", placeholder=default_name, key="new_template_name")
-
-# with col4:
-#     save_template = st.button("💾 Save", help="Save current configuration as new template")
-
-# Reset template_saved flag after displaying the input
-if st.session_state.template_saved:
-    st.session_state.template_saved = False
-
 # Load template data when selection changes
-if st.session_state.selected_template_name != selected_template:
-    st.session_state.selected_template_name = selected_template
+if st.session_state.selected_template_name != st.session_state.get("last_selected_template"):
+    st.session_state.last_selected_template = st.session_state.selected_template_name
+    selected_template = st.session_state.selected_template_name
 
     if selected_template == "+ Create New Template":
         # Default template for new creation
@@ -296,22 +266,101 @@ A1+B1-C1 @1 &(0,)
 A1-B1+C1 @1 &(0,)
 A1-B1-C1 @1 &(0,)""",
         }
-    else:
-        # Load selected template
+    elif selected_template:
         template_path = f"templates/{selected_template}.txt"
         loaded_data = load_template_from_file(template_path)
-        if loaded_data is None:
-            st.error(f"Could not load template: {selected_template}")
-            st.session_state.template_data = {"num_pattern": "A1=random.randint(1,10)", "qtemplates": "A1 @1 &(0,)"}
-        else:
+        if loaded_data:
             st.session_state.template_data = loaded_data
+        else:
+            st.session_state.template_data = {
+                "num_pattern": "A1=random.randint(1,10)",
+                "qtemplates": "A1 @1 &(0,)",
+            }
 
-# Get current template data
+# Provide default if still None
 current_template_data = (
     st.session_state.template_data
     if st.session_state.template_data
     else {"num_pattern": "A1=random.randint(1,10)", "qtemplates": "A1 @1 &(0,)"}
 )
+
+
+# Template switcher at the top
+# st.markdown("### 📋 Template Manager")
+# col1, col2 = st.columns([3, 1])
+
+# with col1:
+#     # Get available templates
+#     available_templates = get_available_templates()
+#     template_options = available_templates + ["+ Create New Template"]
+
+#     # Set default selection
+#     default_index = 0 if available_templates else len(template_options) - 1
+
+#     selected_template = st.selectbox("Choose Template:", template_options, index=default_index, key="template_selector")
+
+# with col2:
+#     if st.button("🔄 Refresh Templates"):
+#         st.session_state.selected_template_name = None
+#         st.rerun()
+
+# # with col3:
+# #     # Set default value based on whether template was just saved
+# #     default_name = "" if st.session_state.template_saved else f"template{get_next_template_number()}"
+# #     new_template_name = st.text_input("New Template Name:", placeholder=default_name, key="new_template_name")
+
+# # with col4:
+# #     save_template = st.button("💾 Save", help="Save current configuration as new template")
+
+# # Reset template_saved flag after displaying the input
+# if st.session_state.template_saved:
+#     st.session_state.template_saved = False
+
+# # Load template data when selection changes
+# if st.session_state.selected_template_name != selected_template:
+#     st.session_state.selected_template_name = selected_template
+
+#     if selected_template == "+ Create New Template":
+#         # Default template for new creation
+#         st.session_state.template_data = {
+#             "num_pattern": """A1=random.randint(1,29)
+# A2=random.randint(10,99)
+# B1=random.randint(1,19)
+# B2=random.randint(10,99)
+# B3=10-B1
+# C1=random.randint(1,9)
+# C2=random.randint(10,99)
+# bA2=C1*10-A2 if C1*10>A2 else C1*100-A2
+# bA3=C1*10+A2""",
+#             "qtemplates": """(A1-B1)-C1 @1 &(0,)
+# (A1-B1)+C1 @1 &(0,)
+# (A1+B1)-C1 @1 &(0,)
+# (A1+B1)+C1 @1 &(0,)
+# C1-(A1-B1) @1 &(0,)
+# C1+(A1-B1) @1 &(0,)
+# C1-(A1+B1) @1 &(0,)
+# C1+(A1+B1) @1 &(0,)
+# A1+B1+C1 @1 &(0,)
+# A1+B1-C1 @1 &(0,)
+# A1-B1+C1 @1 &(0,)
+# A1-B1-C1 @1 &(0,)""",
+#         }
+#     else:
+#         # Load selected template
+#         template_path = f"templates/{selected_template}.txt"
+#         loaded_data = load_template_from_file(template_path)
+#         if loaded_data is None:
+#             st.error(f"Could not load template: {selected_template}")
+#             st.session_state.template_data = {"num_pattern": "A1=random.randint(1,10)", "qtemplates": "A1 @1 &(0,)"}
+#         else:
+#             st.session_state.template_data = loaded_data
+
+# # Get current template data
+# current_template_data = (
+#     st.session_state.template_data
+#     if st.session_state.template_data
+#     else {"num_pattern": "A1=random.randint(1,10)", "qtemplates": "A1 @1 &(0,)"}
+# )
 
 
 
@@ -342,6 +391,55 @@ current_template_data = (
 
 # Sidebar for inputs
 with st.sidebar:
+    st.header("📋 Template Manager")
+
+    # Get available templates
+    available_templates = get_available_templates()
+    template_options = available_templates + ["+ Create New Template"]
+
+    # Set default selection
+    default_index = 0 if available_templates else len(template_options) - 1
+    selected_template = st.selectbox("Choose Template:", template_options, index=default_index, key="template_selector")
+
+    if st.button("🔄 Refresh Templates"):
+        st.session_state.selected_template_name = None
+        st.rerun()
+
+    # New template name + save
+    default_name = "" if st.session_state.template_saved else f"template{get_next_template_number()}"
+    new_template_name = st.text_input("New Template Name:", placeholder=default_name, key="new_template_name_sidebar")
+
+    if st.button("💾 Save Current Template", key="save_template_sidebar"):
+        if new_template_name:
+            success = save_template_to_file(
+                new_template_name,
+                st.session_state.current_num_pattern,
+                st.session_state.current_qtemplates,
+            )
+            if success:
+                st.success(f"✅ Template '{new_template_name}' saved!")
+                st.session_state.template_saved = True
+                st.rerun()
+        else:
+            st.warning("Please enter a template name.")
+
+    # Delete template option
+    if (
+        st.session_state.selected_template_name
+        and st.session_state.selected_template_name != "+ Create New Template"
+        and available_templates
+    ):
+        st.subheader("⚠️ Delete Template")
+        if st.button("🗑️ Delete Current Template", help="Permanently delete this template file"):
+            try:
+                template_path = f"templates/{st.session_state.selected_template_name}.txt"
+                os.remove(template_path)
+                st.success(f"Deleted template: {st.session_state.selected_template_name}")
+                st.session_state.selected_template_name = None
+                st.rerun()
+            except Exception as e:
+                st.error(f"Error deleting template: {e}")
+
     st.header("Configuration")
 
     # Input for number patterns - use current template data as value
