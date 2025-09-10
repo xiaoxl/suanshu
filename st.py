@@ -238,7 +238,7 @@ if "template_saved" not in st.session_state:
 
 # Template switcher at the top
 st.markdown("### 📋 Template Manager")
-col1, col2 = st.columns([3, 1, 2, 1])
+col1, col2 = st.columns([3, 1])
 
 with col1:
     # Get available templates
