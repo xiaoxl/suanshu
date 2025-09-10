@@ -1,0 +1,6 @@
+A1=random.randint(1,9)
+A2=random.randint(10,99)
+B1=random.randint(1,9)
+---
+A2/B1 @1 &(0,)
+A1*B1 @1 &(0,)

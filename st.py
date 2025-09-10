@@ -10,11 +10,11 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 import tempfile
 import os
+import glob
+from pathlib import Path
 
 # Configure page
 st.set_page_config(page_title="Math Pattern Generator", layout="wide")
-
-st.title("Math Pattern Generator")
 
 
 # Your original functions
@@ -162,8 +162,119 @@ def create_pdf_from_images(image_buffers):
     return pdf_buffer
 
 
-# Default values
-default_num_pattern = """A1=random.randint(1,29)
+# Template management functions
+def load_template_from_file(filepath):
+    """Load template from file with --- separator"""
+    try:
+        with open(filepath, "r") as f:
+            content = f.read().strip()
+
+        if "---" in content:
+            parts = content.split("---", 1)
+            num_pattern = parts[0].strip()
+            qtemplates = parts[1].strip()
+            return {"num_pattern": num_pattern, "qtemplates": qtemplates}
+        else:
+            return None
+    except Exception:
+        return None
+
+
+def save_template_to_file(name, num_pattern, qtemplates):
+    """Save template to file with --- separator"""
+    try:
+        # Create templates directory if it doesn't exist
+        os.makedirs("templates", exist_ok=True)
+
+        filepath = f"templates/{name}.txt"
+        content = f"{num_pattern}\n---\n{qtemplates}"
+
+        with open(filepath, "w") as f:
+            f.write(content)
+        return True
+    except Exception as e:
+        st.error(f"Error saving template: {e}")
+        return False
+
+
+def get_available_templates():
+    """Get list of available template files"""
+    try:
+        os.makedirs("templates", exist_ok=True)
+        template_files = glob.glob("templates/*.txt")
+        template_names = [Path(f).stem for f in template_files]
+        return sorted(template_names)
+    except Exception:
+        return []
+
+
+def get_next_template_number():
+    """Get the next available template number"""
+    existing_templates = get_available_templates()
+    numbers = []
+    for template in existing_templates:
+        if template.startswith("template") and template[8:].isdigit():
+            numbers.append(int(template[8:]))
+
+    if numbers:
+        return max(numbers) + 1
+    else:
+        return 1
+
+
+# ============================================================================
+# MAIN APP STARTS HERE
+# ============================================================================
+
+st.title("Math Pattern Generator")
+
+# Initialize session state
+if "selected_template_name" not in st.session_state:
+    st.session_state.selected_template_name = None
+if "template_data" not in st.session_state:
+    st.session_state.template_data = None
+if "template_saved" not in st.session_state:
+    st.session_state.template_saved = False
+
+# Template switcher at the top
+st.markdown("### 📋 Template Manager")
+col1, col2, col3, col4 = st.columns([3, 2, 2, 1])
+
+with col1:
+    # Get available templates
+    available_templates = get_available_templates()
+    template_options = available_templates + ["+ Create New Template"]
+
+    # Set default selection
+    default_index = 0 if available_templates else len(template_options) - 1
+
+    selected_template = st.selectbox("Choose Template:", template_options, index=default_index, key="template_selector")
+
+with col2:
+    if st.button("🔄 Refresh Templates"):
+        st.session_state.selected_template_name = None
+        st.rerun()
+
+with col3:
+    # Set default value based on whether template was just saved
+    default_name = "" if st.session_state.template_saved else f"template{get_next_template_number()}"
+    new_template_name = st.text_input("New Template Name:", placeholder=default_name, key="new_template_name")
+
+with col4:
+    save_template = st.button("💾 Save", help="Save current configuration as new template")
+
+# Reset template_saved flag after displaying the input
+if st.session_state.template_saved:
+    st.session_state.template_saved = False
+
+# Load template data when selection changes
+if st.session_state.selected_template_name != selected_template:
+    st.session_state.selected_template_name = selected_template
+
+    if selected_template == "+ Create New Template":
+        # Default template for new creation
+        st.session_state.template_data = {
+            "num_pattern": """A1=random.randint(1,29)
 A2=random.randint(10,99)
 B1=random.randint(1,19)
 B2=random.randint(10,99)
@@ -171,9 +282,8 @@ B3=10-B1
 C1=random.randint(1,9)
 C2=random.randint(10,99)
 bA2=C1*10-A2 if C1*10>A2 else C1*100-A2
-bA3=C1*10+A2"""
-
-default_qtemplates = """(A1-B1)-C1 @1 &(0,)
+bA3=C1*10+A2""",
+            "qtemplates": """(A1-B1)-C1 @1 &(0,)
 (A1-B1)+C1 @1 &(0,)
 (A1+B1)-C1 @1 &(0,)
 (A1+B1)+C1 @1 &(0,)
@@ -184,21 +294,71 @@ C1+(A1+B1) @1 &(0,)
 A1+B1+C1 @1 &(0,)
 A1+B1-C1 @1 &(0,)
 A1-B1+C1 @1 &(0,)
-A1-B1-C1 @1 &(0,)"""
+A1-B1-C1 @1 &(0,)""",
+        }
+    else:
+        # Load selected template
+        template_path = f"templates/{selected_template}.txt"
+        loaded_data = load_template_from_file(template_path)
+        if loaded_data is None:
+            st.error(f"Could not load template: {selected_template}")
+            st.session_state.template_data = {"num_pattern": "A1=random.randint(1,10)", "qtemplates": "A1 @1 &(0,)"}
+        else:
+            st.session_state.template_data = loaded_data
+
+# Get current template data
+current_template_data = (
+    st.session_state.template_data
+    if st.session_state.template_data
+    else {"num_pattern": "A1=random.randint(1,10)", "qtemplates": "A1 @1 &(0,)"}
+)
+
+# Handle template saving
+if save_template:
+    if new_template_name:
+        # Get current values from session state
+        if hasattr(st.session_state, "current_num_pattern") and hasattr(st.session_state, "current_qtemplates"):
+            success = save_template_to_file(
+                new_template_name, st.session_state.current_num_pattern, st.session_state.current_qtemplates
+            )
+            if success:
+                st.success(f"✅ Template '{new_template_name}' saved!")
+                # Set flag to clear the name field on next render
+                st.session_state.template_saved = True
+                st.rerun()
+        else:
+            # Fallback - save current displayed values
+            success = save_template_to_file(
+                new_template_name, current_template_data["num_pattern"], current_template_data["qtemplates"]
+            )
+            if success:
+                st.success(f"✅ Template '{new_template_name}' saved!")
+                st.session_state.template_saved = True
+                st.rerun()
+    else:
+        st.warning("Please enter a template name.")
 
 # Sidebar for inputs
 with st.sidebar:
     st.header("Configuration")
 
-    # Input for number patterns
+    # Input for number patterns - use current template data as value
     st.subheader("Number Pattern")
     num_pattern = st.text_area(
-        "Number Pattern Code", value=default_num_pattern, height=200, help="Python code to generate random numbers"
+        "Number Pattern Code",
+        value=current_template_data["num_pattern"],
+        height=200,
+        help="Python code to generate random numbers",
+        key="current_num_pattern",
     )
 
     st.subheader("Question Templates")
     qtemplates_v2 = st.text_area(
-        "Question Templates", value=default_qtemplates, height=300, help="Templates for generating math questions"
+        "Question Templates",
+        value=current_template_data["qtemplates"],
+        height=300,
+        help="Templates for generating math questions",
+        key="current_qtemplates",
     )
 
     st.subheader("Settings")
@@ -206,6 +366,56 @@ with st.sidebar:
     Ncol = st.slider("Columns per Page", 2, 6, 4)
     Nrow = st.slider("Rows per Page", 4, 12, 8)
     fontsize = st.slider("Font Size", 6, 20, 10)
+
+    # Template Preview in sidebar
+    st.subheader("📋 Template Preview")
+    if st.session_state.selected_template_name == "+ Create New Template":
+        st.write("**Current:** New Template")
+    elif st.session_state.selected_template_name:
+        st.write(f"**Current:** {st.session_state.selected_template_name}")
+    else:
+        st.write("**Current:** None")
+
+    with st.expander("Show Variables & Samples"):
+        col_preview1, col_preview2 = st.columns([1, 1])
+
+        with col_preview1:
+            st.write("**Variables:**")
+            try:
+                # Show what variables will be generated using current values
+                sample_vars = random_pattern(num_pattern)
+                for var, val in sample_vars.items():
+                    st.write(f"{var}={val}")
+            except Exception as e:
+                st.error(f"Error: {e}")
+
+        with col_preview2:
+            st.write("**Samples:**")
+            try:
+                sample_problems = genqvault(qtemplates_v2, num_pattern, 2)
+                for i, prob in enumerate(sample_problems):
+                    result = eval(prob)
+                    st.write(f"{prob}={result}")
+            except Exception as e:
+                st.error(f"Error: {e}")
+
+    # Delete template option
+    if (
+        st.session_state.selected_template_name
+        and st.session_state.selected_template_name != "+ Create New Template"
+        and available_templates
+    ):
+        st.subheader("⚠️ Delete Template")
+        if st.button("🗑️ Delete Current Template", help="Permanently delete this template file"):
+            try:
+                template_path = f"templates/{st.session_state.selected_template_name}.txt"
+                os.remove(template_path)
+                st.success(f"Deleted template: {st.session_state.selected_template_name}")
+                # Reset to create new template after deletion
+                st.session_state.selected_template_name = None
+                st.rerun()
+            except Exception as e:
+                st.error(f"Error deleting template: {e}")
 
 # Main content area
 col1, col2 = st.columns([2, 1])
@@ -254,9 +464,26 @@ with col1:
 with col2:
     st.header("Preview & Download")
 
+    # Generate and Download PDF buttons BEFORE worksheet previews
     if hasattr(st.session_state, "worksheets") and st.session_state.worksheets:
-        # Display PNG previews
-        st.subheader("Worksheet Previews")
+        # Download as PDF section
+        st.subheader("📄 Download All Pages as PDF")
+
+        # Pre-create PDF when worksheets exist for immediate download
+        try:
+            pdf_buffer = create_pdf_from_images(st.session_state.worksheets)
+            st.download_button(
+                label="📄 Create and Download PDF",
+                data=pdf_buffer.getvalue(),
+                file_name="math_worksheets.pdf",
+                mime="application/pdf",
+                type="secondary",
+            )
+        except Exception as e:
+            st.error(f"Error creating PDF: {str(e)}")
+
+        # Display PNG previews AFTER the PDF buttons
+        st.subheader("🖼️ Worksheet Previews")
         for i, worksheet_buffer in enumerate(st.session_state.worksheets):
             st.write(f"**Page {i + 1}:**")
             # Display the image
@@ -264,7 +491,7 @@ with col2:
             st.image(image, width=300)
 
         # Download individual PNGs
-        st.subheader("Download Individual Pages")
+        st.subheader("📥 Download Individual Pages")
         for i, worksheet_buffer in enumerate(st.session_state.worksheets):
             st.download_button(
                 label=f"Download Page {i + 1} (PNG)",
@@ -274,70 +501,31 @@ with col2:
                 key=f"png_{i}",
             )
 
-        # Download as PDF
-        st.subheader("Download All Pages as PDF")
-        if st.button("Create PDF", type="secondary"):
-            try:
-                pdf_buffer = create_pdf_from_images(st.session_state.worksheets)
-                st.session_state.pdf_buffer = pdf_buffer
-                st.success("PDF created successfully!")
-            except Exception as e:
-                st.error(f"Error creating PDF: {str(e)}")
-
-        if hasattr(st.session_state, "pdf_buffer"):
-            st.download_button(
-                label="Download PDF",
-                data=st.session_state.pdf_buffer.getvalue(),
-                file_name="math_worksheets.pdf",
-                mime="application/pdf",
-            )
-
 # Instructions
 with st.expander("How to Use"):
     st.write("""
-    1. **Template Presets**: Choose from predefined templates or select 'Custom' to create your own
-    2. **Number Pattern**: Define variables using Python code with random.randint() etc.
-    3. **Question Templates**: Each line should follow the format: `expression @weight &(min,max)`
+    ## 📋 Template Management
+    - **Choose Template**: Select from saved templates or "Create New Template"
+    - **Save Template**: Enter name and click "💾 Save" to create template files
+    - **Template Files**: Saved as `template1.txt`, `template2.txt`, etc. in `templates/` folder
+    - **File Format**: 
+      ```
+      A1=random.randint(1,10)
+      A2=random.randint(10,99)
+      ---
+      A1+A2 @1 &(0,)
+      A1-A2 @1 &(0,)
+      ```
+    
+    ## 🔧 Configuration
+    1. **Number Pattern**: Define variables using Python code with random.randint() etc.
+    2. **Question Templates**: Each line should follow the format: `expression @weight &(min,max)`
        - `expression`: Mathematical expression using your defined variables
        - `@weight`: Probability weight for this template type
        - `&(min,max)`: Answer constraints (optional)
-    4. **Settings**: Adjust layout and appearance
-    5. **Generate**: Click "Generate Worksheets" to create PNG images
-    6. **Download**: Preview and download individual PNGs or combine into PDF
-    
-    **Template Descriptions:**
-    - **Basic Addition/Subtraction**: Simple operations with small numbers
-    - **Multiplication/Division**: Times tables and basic division
-    - **Large Number Operations**: Working with 2-3 digit numbers
-    - **Mixed Operations**: Combining addition, subtraction, and multiplication
-    - **Distributive Property**: Practice with distributive law (a+b)×c = ac+bc
-    - **Custom**: Create your own templates
+    3. **Settings**: Adjust layout and appearance
+    4. **Generate**: Click "Generate Worksheets" to create PNG images
+    5. **Download**: Preview and download individual PNGs or combine into PDF
     
     **Example Template**: `A1+B1-C1 @1 &(0,)` creates problems like "5+3-2=" with positive answers
     """)
-
-# Template Preview
-with st.expander("📋 Current Template Preview"):
-    st.write(f"**Selected Template:** {selected_template}")
-
-    col_preview1, col_preview2 = st.columns(2)
-
-    with col_preview1:
-        st.write("**Variables:**")
-        try:
-            # Show what variables will be generated
-            sample_vars = random_pattern(num_pattern)
-            for var, val in sample_vars.items():
-                st.write(f"- {var} = {val}")
-        except Exception as e:
-            st.error(f"Error in number pattern: {e}")
-
-    with col_preview2:
-        st.write("**Sample Problems:**")
-        try:
-            sample_problems = genqvault(qtemplates_v2, num_pattern, 3)
-            for i, prob in enumerate(sample_problems):
-                result = eval(prob)
-                st.write(f"{i + 1}. {prob} = {result}")
-        except Exception as e:
-            st.error(f"Error generating samples: {e}")

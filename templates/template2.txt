@@ -1,0 +1,22 @@
+A1=random.randint(1,29)
+A2=random.randint(10,99)
+B1=random.randint(1,19)
+B2=random.randint(10,99)
+B3=10-B1
+C1=random.randint(1,9)
+C2=random.randint(10,99)
+bA2=C1*10-A2 if C1*10>A2 else C1*100-A2
+bA3=C1*10+A2
+---
+(A2-B2)-C2 @1 &(0,)
+(A2-B2)+C2 @1 &(0,)
+(A2+B2)-C2 @1 &(0,)
+(A2+B2)+C2 @1 &(0,)
+C2-(A2-B2) @1 &(0,)
+C2+(A2-B2) @1 &(0,)
+C2-(A2+B2) @1 &(0,)
+C2+(A2+B2) @1 &(0,)
+A2+B2+C2 @1 &(0,)
+A2+B2-C2 @1 &(0,)
+A2-B2+C2 @1 &(0,)
+A2-B2-C2 @1 &(0,)
