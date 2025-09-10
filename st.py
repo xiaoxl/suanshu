@@ -255,13 +255,13 @@ with col2:
         st.session_state.selected_template_name = None
         st.rerun()
 
-with col3:
-    # Set default value based on whether template was just saved
-    default_name = "" if st.session_state.template_saved else f"template{get_next_template_number()}"
-    new_template_name = st.text_input("New Template Name:", placeholder=default_name, key="new_template_name")
+# with col3:
+#     # Set default value based on whether template was just saved
+#     default_name = "" if st.session_state.template_saved else f"template{get_next_template_number()}"
+#     new_template_name = st.text_input("New Template Name:", placeholder=default_name, key="new_template_name")
 
-with col4:
-    save_template = st.button("💾 Save", help="Save current configuration as new template")
+# with col4:
+#     save_template = st.button("💾 Save", help="Save current configuration as new template")
 
 # Reset template_saved flag after displaying the input
 if st.session_state.template_saved:
@@ -313,30 +313,32 @@ current_template_data = (
     else {"num_pattern": "A1=random.randint(1,10)", "qtemplates": "A1 @1 &(0,)"}
 )
 
+
+
 # Handle template saving
-if save_template:
-    if new_template_name:
-        # Get current values from session state
-        if hasattr(st.session_state, "current_num_pattern") and hasattr(st.session_state, "current_qtemplates"):
-            success = save_template_to_file(
-                new_template_name, st.session_state.current_num_pattern, st.session_state.current_qtemplates
-            )
-            if success:
-                st.success(f"✅ Template '{new_template_name}' saved!")
-                # Set flag to clear the name field on next render
-                st.session_state.template_saved = True
-                st.rerun()
-        else:
-            # Fallback - save current displayed values
-            success = save_template_to_file(
-                new_template_name, current_template_data["num_pattern"], current_template_data["qtemplates"]
-            )
-            if success:
-                st.success(f"✅ Template '{new_template_name}' saved!")
-                st.session_state.template_saved = True
-                st.rerun()
-    else:
-        st.warning("Please enter a template name.")
+# if save_template:
+#     if new_template_name:
+#         # Get current values from session state
+#         if hasattr(st.session_state, "current_num_pattern") and hasattr(st.session_state, "current_qtemplates"):
+#             success = save_template_to_file(
+#                 new_template_name, st.session_state.current_num_pattern, st.session_state.current_qtemplates
+#             )
+#             if success:
+#                 st.success(f"✅ Template '{new_template_name}' saved!")
+#                 # Set flag to clear the name field on next render
+#                 st.session_state.template_saved = True
+#                 st.rerun()
+#         else:
+#             # Fallback - save current displayed values
+#             success = save_template_to_file(
+#                 new_template_name, current_template_data["num_pattern"], current_template_data["qtemplates"]
+#             )
+#             if success:
+#                 st.success(f"✅ Template '{new_template_name}' saved!")
+#                 st.session_state.template_saved = True
+#                 st.rerun()
+#     else:
+#         st.warning("Please enter a template name.")
 
 # Sidebar for inputs
 with st.sidebar:
@@ -347,7 +349,7 @@ with st.sidebar:
     num_pattern = st.text_area(
         "Number Pattern Code",
         value=current_template_data["num_pattern"],
-        height=200,
+        height=150,
         help="Python code to generate random numbers",
         key="current_num_pattern",
     )
@@ -356,10 +358,29 @@ with st.sidebar:
     qtemplates_v2 = st.text_area(
         "Question Templates",
         value=current_template_data["qtemplates"],
-        height=300,
+        height=250,
         help="Templates for generating math questions",
         key="current_qtemplates",
     )
+
+    # Save Template option (moved here)
+    st.subheader("💾 Save Template")
+    default_name = "" if st.session_state.template_saved else f"template{get_next_template_number()}"
+    new_template_name = st.text_input("New Template Name:", placeholder=default_name, key="new_template_name_sidebar")
+
+    if st.button("💾 Save Current Template", key="save_template_sidebar"):
+        if new_template_name:
+            success = save_template_to_file(
+                new_template_name,
+                st.session_state.current_num_pattern,
+                st.session_state.current_qtemplates,
+            )
+            if success:
+                st.success(f"✅ Template '{new_template_name}' saved!")
+                st.session_state.template_saved = True
+                st.rerun()
+        else:
+            st.warning("Please enter a template name.")
 
     st.subheader("Settings")
     num_pages = st.slider("Number of Pages", 1, 10, 2)
