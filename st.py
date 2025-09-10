@@ -14,6 +14,7 @@ import glob
 from pathlib import Path
 
 # Configure page
+vernum = 'v0.3.2'
 st.set_page_config(page_title="Math Pattern Generator", layout="wide")
 
 
@@ -227,26 +228,6 @@ def get_next_template_number():
 # ============================================================================
 
 
-
-# Initialize session state
-# if "selected_template_name" not in st.session_state:
-#     st.session_state.selected_template_name = "+ Create New Template"
-
-# if "template_data" not in st.session_state:
-#     st.session_state.template_data = None
-
-# if "worksheets" not in st.session_state:
-#     st.session_state.worksheets = []
-
-# if "template_saved" not in st.session_state:
-#     st.session_state.template_saved = False
-# if "selected_template_name" not in st.session_state:
-#     st.session_state.selected_template_name = "+ Create New Template"
-
-# selected_template = st.selectbox(
-#     "Select template", ["Template A", "Template B", "+ Create New Template"], key="selected_template_name"
-# )
-
 for key, default in {
     "selected_template_name": "+ Create New Template",
     "template_data": None,
@@ -257,7 +238,7 @@ for key, default in {
         st.session_state[key] = default
 
 
-st.title("Math Pattern Generator")
+st.title(f"Math Pattern Generator {vernum}")
 
 # Load template data when selection changes
 if st.session_state.selected_template_name != st.session_state.get("last_selected_template"):
@@ -369,7 +350,7 @@ with st.sidebar:
     qtemplates_v2 = st.text_area(
         "Question Templates",
         value=current_template_data["qtemplates"],
-        height=250,
+        height=150,
         help="Templates for generating math questions",
         key="current_qtemplates",
     )
@@ -418,7 +399,7 @@ col1, col2 = st.columns([2, 1])
 with col1:
     st.header("Math Worksheet Generator")
 
-    col11, col21 = st.columns([1, 1, 1])
+    col11, col21 = st.columns([1, 1])
 
     with col11:
         if st.button("Generate Worksheets", type="primary"):
