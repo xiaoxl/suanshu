@@ -508,7 +508,7 @@ col1, col2 = st.columns([2, 1])
 with col1:
     st.header("Math Worksheet Generator")
 
-    col11, col21 = st.columns([2, 1])
+    col11, col21, col31 = st.columns([1, 1, 1])
 
     with col11:
         if st.button("Generate Worksheets", type="primary"):
@@ -540,28 +540,7 @@ with col1:
         if st.button("🔄 Refresh Templates"):
             st.session_state.selected_template_name = None
             st.rerun()
-
-    # Display sample problems if worksheets exist
-    if hasattr(st.session_state, "worksheets"):
-        st.subheader("Sample Problems")
-        try:
-            # Generate a small sample to show
-            sample_problems = genqvault(qtemplates_v2, num_pattern, 6)
-            for i, prob in enumerate(sample_problems):
-                result = eval(prob)
-                st.write(f"{i + 1}. {prob} = {result}")
-        except Exception as e:
-            st.warning(f"Could not generate sample: {str(e)}")
-
-with col2:
-    st.header("Preview & Download")
-
-    # Generate and Download PDF buttons BEFORE worksheet previews
-    if hasattr(st.session_state, "worksheets") and st.session_state.worksheets:
-        # Download as PDF section
-        st.subheader("📄 Download All Pages as PDF")
-
-        # Pre-create PDF when worksheets exist for immediate download
+    with col31:
         try:
             pdf_buffer = create_pdf_from_images(st.session_state.worksheets)
             st.download_button(
@@ -573,6 +552,17 @@ with col2:
             )
         except Exception as e:
             st.error(f"Error creating PDF: {str(e)}")
+    # Display sample problems if worksheets exist
+    
+    st.header("Preview & Download")
+
+    # Generate and Download PDF buttons BEFORE worksheet previews
+    if hasattr(st.session_state, "worksheets") and st.session_state.worksheets:
+        # Download as PDF section
+        st.subheader("📄 Download All Pages as PDF")
+
+        # Pre-create PDF when worksheets exist for immediate download
+
 
         # Display PNG previews AFTER the PDF buttons
         st.subheader("🖼️ Worksheet Previews")
@@ -592,6 +582,19 @@ with col2:
                 mime="image/png",
                 key=f"png_{i}",
             )
+
+
+with col2:
+    if hasattr(st.session_state, "worksheets"):
+        st.subheader("Sample Problems")
+        try:
+            # Generate a small sample to show
+            sample_problems = genqvault(qtemplates_v2, num_pattern, 6)
+            for i, prob in enumerate(sample_problems):
+                result = eval(prob)
+                st.write(f"{i + 1}. {prob} = {result}")
+        except Exception as e:
+            st.warning(f"Could not generate sample: {str(e)}")
 
 # Instructions
 with st.expander("How to Use"):
