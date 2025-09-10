@@ -14,7 +14,8 @@ import glob
 from pathlib import Path
 
 # Configure page
-st.set_page_config(page_title="Math Pattern Generator v0.1", layout="wide")
+
+st.set_page_config(page_title="Math Pattern Generator", layout="wide")
 
 
 # Your original functions
@@ -360,6 +361,18 @@ with st.sidebar:
         help="Templates for generating math questions",
         key="current_qtemplates",
     )
+
+    # Template Save Section
+    st.subheader("💾 Save Template")
+    col_save1, col_save2 = st.columns([3, 1])
+
+    with col_save1:
+        # Set default value based on whether template was just saved
+        default_name = "" if st.session_state.template_saved else f"template{get_next_template_number()}"
+        new_template_name = st.text_input("Template Name:", placeholder=default_name, key="new_template_name")
+
+    with col_save2:
+        save_template = st.button("💾 Save", help="Save current configuration as new template")
 
     st.subheader("Settings")
     num_pages = st.slider("Number of Pages", 1, 10, 2)
