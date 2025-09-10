@@ -405,7 +405,7 @@ with st.sidebar:
         st.session_state.selected_template_name = None
         st.rerun()
 
-    # New template name + save
+    # Template save input (only once)
     default_name = "" if st.session_state.template_saved else f"template{get_next_template_number()}"
     new_template_name = st.text_input("New Template Name:", placeholder=default_name, key="new_template_name_sidebar")
 
@@ -442,8 +442,7 @@ with st.sidebar:
 
     st.header("Configuration")
 
-    # Input for number patterns - use current template data as value
-    # st.subheader("Number Pattern")
+    # Input for number patterns
     num_pattern = st.text_area(
         "Number Pattern Code",
         value=current_template_data["num_pattern"],
@@ -452,7 +451,7 @@ with st.sidebar:
         key="current_num_pattern",
     )
 
-    # st.subheader("Question Templates")
+    # Input for question templates
     qtemplates_v2 = st.text_area(
         "Question Templates",
         value=current_template_data["qtemplates"],
@@ -461,32 +460,13 @@ with st.sidebar:
         key="current_qtemplates",
     )
 
-    # Save Template option (moved here)
-    # st.subheader("💾 Save Template")
-    default_name = "" if st.session_state.template_saved else f"template{get_next_template_number()}"
-    new_template_name = st.text_input("New Template Name:", placeholder=default_name, key="new_template_name_sidebar")
-
-    if st.button("💾 Save Current Template", key="save_template_sidebar"):
-        if new_template_name:
-            success = save_template_to_file(
-                new_template_name,
-                st.session_state.current_num_pattern,
-                st.session_state.current_qtemplates,
-            )
-            if success:
-                st.success(f"✅ Template '{new_template_name}' saved!")
-                st.session_state.template_saved = True
-                st.rerun()
-        else:
-            st.warning("Please enter a template name.")
-
     st.subheader("Settings")
     num_pages = st.slider("Number of Pages", 1, 10, 2)
     Ncol = st.slider("Columns per Page", 2, 6, 4)
     Nrow = st.slider("Rows per Page", 4, 12, 8)
     fontsize = st.slider("Font Size", 6, 20, 10)
 
-    # Template Preview in sidebar
+    # Template Preview
     st.subheader("📋 Template Preview")
     if st.session_state.selected_template_name == "+ Create New Template":
         st.write("**Current:** New Template")
@@ -501,7 +481,6 @@ with st.sidebar:
         with col_preview1:
             st.write("**Variables:**")
             try:
-                # Show what variables will be generated using current values
                 sample_vars = random_pattern(num_pattern)
                 for var, val in sample_vars.items():
                     st.write(f"{var}={val}")
@@ -518,23 +497,6 @@ with st.sidebar:
             except Exception as e:
                 st.error(f"Error: {e}")
 
-    # Delete template option
-    if (
-        st.session_state.selected_template_name
-        and st.session_state.selected_template_name != "+ Create New Template"
-        and available_templates
-    ):
-        st.subheader("⚠️ Delete Template")
-        if st.button("🗑️ Delete Current Template", help="Permanently delete this template file"):
-            try:
-                template_path = f"templates/{st.session_state.selected_template_name}.txt"
-                os.remove(template_path)
-                st.success(f"Deleted template: {st.session_state.selected_template_name}")
-                # Reset to create new template after deletion
-                st.session_state.selected_template_name = None
-                st.rerun()
-            except Exception as e:
-                st.error(f"Error deleting template: {e}")
 
 # Main content area
 col1, col2 = st.columns([2, 1])
