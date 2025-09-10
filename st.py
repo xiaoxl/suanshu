@@ -238,7 +238,7 @@ if "template_saved" not in st.session_state:
 
 # Template switcher at the top
 st.markdown("### 📋 Template Manager")
-col1, col2, col3, col4 = st.columns([3, 2, 2, 1])
+col1, col2 = st.columns([3, 1, 2, 1])
 
 with col1:
     # Get available templates
@@ -345,7 +345,7 @@ with st.sidebar:
     st.header("Configuration")
 
     # Input for number patterns - use current template data as value
-    st.subheader("Number Pattern")
+    # st.subheader("Number Pattern")
     num_pattern = st.text_area(
         "Number Pattern Code",
         value=current_template_data["num_pattern"],
@@ -354,7 +354,7 @@ with st.sidebar:
         key="current_num_pattern",
     )
 
-    st.subheader("Question Templates")
+    # st.subheader("Question Templates")
     qtemplates_v2 = st.text_area(
         "Question Templates",
         value=current_template_data["qtemplates"],
@@ -364,7 +364,7 @@ with st.sidebar:
     )
 
     # Save Template option (moved here)
-    st.subheader("💾 Save Template")
+    # st.subheader("💾 Save Template")
     default_name = "" if st.session_state.template_saved else f"template{get_next_template_number()}"
     new_template_name = st.text_input("New Template Name:", placeholder=default_name, key="new_template_name_sidebar")
 
