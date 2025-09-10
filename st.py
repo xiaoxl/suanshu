@@ -554,23 +554,23 @@ with col1:
             st.error(f"Error creating PDF: {str(e)}")
     # Display sample problems if worksheets exist
     
-    st.header("Preview & Download")
+    st.header("Preview")
 
     # Generate and Download PDF buttons BEFORE worksheet previews
     if hasattr(st.session_state, "worksheets") and st.session_state.worksheets:
         # Download as PDF section
-        st.subheader("📄 Download All Pages as PDF")
+        # st.subheader("📄 Download All Pages as PDF")
 
         # Pre-create PDF when worksheets exist for immediate download
 
 
         # Display PNG previews AFTER the PDF buttons
-        st.subheader("🖼️ Worksheet Previews")
+        # st.subheader("🖼️ Worksheet Previews")
         for i, worksheet_buffer in enumerate(st.session_state.worksheets):
             st.write(f"**Page {i + 1}:**")
             # Display the image
             image = Image.open(BytesIO(worksheet_buffer.getvalue()))
-            st.image(image, width=300)
+            st.image(image, width=500)
 
         # Download individual PNGs
         st.subheader("📥 Download Individual Pages")
