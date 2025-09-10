@@ -230,9 +230,14 @@ st.title("Math Pattern Generator")
 
 # Initialize session state
 if "selected_template_name" not in st.session_state:
-    st.session_state.selected_template_name = None
+    st.session_state.selected_template_name = "+ Create New Template"
+
 if "template_data" not in st.session_state:
     st.session_state.template_data = None
+
+if "worksheets" not in st.session_state:
+    st.session_state.worksheets = []
+
 if "template_saved" not in st.session_state:
     st.session_state.template_saved = False
 
@@ -421,7 +426,7 @@ with col1:
                 st.error("Please check your number pattern and question templates for syntax errors.")
     with col21:
         if st.button("🔄 Refresh Templates"):
-            st.session_state.update({"selected_template_name": "+ Create New Template"})
+            st.session_state.selected_template_name = "+ Create New Template"
             st.rerun()
     with col31:
         try:
