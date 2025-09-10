@@ -240,21 +240,21 @@ def get_next_template_number():
 
 # if "template_saved" not in st.session_state:
 #     st.session_state.template_saved = False
-if "selected_template_name" not in st.session_state:
-    st.session_state.selected_template_name = "+ Create New Template"
+# if "selected_template_name" not in st.session_state:
+#     st.session_state.selected_template_name = "+ Create New Template"
 
-selected_template = st.selectbox(
-    "Select template", ["Template A", "Template B", "+ Create New Template"], key="selected_template_name"
-)
+# selected_template = st.selectbox(
+#     "Select template", ["Template A", "Template B", "+ Create New Template"], key="selected_template_name"
+# )
 
-# for key, default in {
-#     "selected_template_name": "+ Create New Template",
-#     "template_data": None,
-#     "worksheets": [],
-#     "template_saved": False,
-# }.items():
-#     if key not in st.session_state:
-#         st.session_state[key] = default
+for key, default in {
+    "selected_template_name": "+ Create New Template",
+    "template_data": None,
+    "worksheets": [],
+    "template_saved": False,
+}.items():
+    if key not in st.session_state:
+        st.session_state[key] = default
 
 
 st.title("Math Pattern Generator")
@@ -418,7 +418,7 @@ col1, col2 = st.columns([2, 1])
 with col1:
     st.header("Math Worksheet Generator")
 
-    col11, col21, col31 = st.columns([1, 1, 1])
+    col11, col21 = st.columns([1, 1, 1])
 
     with col11:
         if st.button("Generate Worksheets", type="primary"):
@@ -446,11 +446,11 @@ with col1:
             except Exception as e:
                 st.error(f"Error generating worksheets: {str(e)}")
                 st.error("Please check your number pattern and question templates for syntax errors.")
+    # with col21:
+    #     if st.button("🔄 Refresh Templates"):
+    #         st.session_state.update({"selected_template_name": "+ Create New Template"})
+    #         st.rerun()
     with col21:
-        if st.button("🔄 Refresh Templates"):
-            st.session_state.update({"selected_template_name": "+ Create New Template"})
-            st.rerun()
-    with col31:
         try:
             pdf_buffer = create_pdf_from_images(st.session_state.worksheets)
             st.download_button(
