@@ -14,7 +14,7 @@ import glob
 from pathlib import Path
 
 # Configure page
-st.set_page_config(page_title="Math Pattern Generator", layout="wide")
+st.set_page_config(page_title="Math Pattern Generator v0.1", layout="wide")
 
 
 # Your original functions
