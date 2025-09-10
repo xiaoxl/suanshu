@@ -393,35 +393,39 @@ current_template_data = (
 with st.sidebar:
     st.header("📋 Template Manager")
 
-    # Get available templates
+    # # Get available templates
+    # available_templates = get_available_templates()
+    # template_options = available_templates + ["+ Create New Template"]
+
+    # # Set default selection
+    # default_index = 0 if available_templates else len(template_options) - 1
+    # selected_template = st.selectbox("Choose Template:", template_options, index=default_index, key="template_selector")
+
+    # if st.button("🔄 Refresh Templates"):
+    #     st.session_state.selected_template_name = None
+    #     st.rerun()
+
+    # # Template save input (only once)
+    # default_name = "" if st.session_state.template_saved else f"template{get_next_template_number()}"
+    # new_template_name = st.text_input("New Template Name:", placeholder=default_name, key="new_template_name_sidebar")
+
+    # Template selector
     available_templates = get_available_templates()
     template_options = available_templates + ["+ Create New Template"]
-
-    # Set default selection
     default_index = 0 if available_templates else len(template_options) - 1
     selected_template = st.selectbox("Choose Template:", template_options, index=default_index, key="template_selector")
 
-    if st.button("🔄 Refresh Templates"):
-        st.session_state.selected_template_name = None
-        st.rerun()
-
-    # Template save input (only once)
-    default_name = "" if st.session_state.template_saved else f"template{get_next_template_number()}"
-    new_template_name = st.text_input("New Template Name:", placeholder=default_name, key="new_template_name_sidebar")
-
+    # Save button under template selector
     if st.button("💾 Save Current Template", key="save_template_sidebar"):
-        if new_template_name:
-            success = save_template_to_file(
-                new_template_name,
-                st.session_state.current_num_pattern,
-                st.session_state.current_qtemplates,
-            )
-            if success:
-                st.success(f"✅ Template '{new_template_name}' saved!")
-                st.session_state.template_saved = True
-                st.rerun()
-        else:
-            st.warning("Please enter a template name.")
+        # Automatically generate next template name
+        new_template_name = f"template{get_next_template_number()}"
+        success = save_template_to_file(
+            new_template_name, st.session_state.current_num_pattern, st.session_state.current_qtemplates
+        )
+        if success:
+            st.success(f"✅ Template '{new_template_name}' saved!")
+            st.session_state.template_saved = True
+            st.rerun()
 
     # Delete template option
     if (
@@ -440,7 +444,7 @@ with st.sidebar:
             except Exception as e:
                 st.error(f"Error deleting template: {e}")
 
-    st.header("Configuration")
+    # st.header("Configuration")
 
     # Input for number patterns
     num_pattern = st.text_area(
@@ -504,31 +508,38 @@ col1, col2 = st.columns([2, 1])
 with col1:
     st.header("Math Worksheet Generator")
 
-    if st.button("Generate Worksheets", type="primary"):
-        try:
-            # Generate worksheets
-            worksheets = []
-            problems_per_page = Ncol * Nrow
+    col11, col21 = st.columns([2, 1])
 
-            progress_bar = st.progress(0)
+    with col11:
+        if st.button("Generate Worksheets", type="primary"):
+            try:
+                # Generate worksheets
+                worksheets = []
+                problems_per_page = Ncol * Nrow
 
-            for page in range(num_pages):
-                # Generate problems for this page
-                plist = genqvault(qtemplates_v2, num_pattern, problems_per_page)
+                progress_bar = st.progress(0)
 
-                # Create worksheet image
-                img_buffer = create_math_worksheet(plist, Ncol, Nrow, fontsize)
-                worksheets.append(img_buffer)
+                for page in range(num_pages):
+                    # Generate problems for this page
+                    plist = genqvault(qtemplates_v2, num_pattern, problems_per_page)
 
-                # Update progress
-                progress_bar.progress((page + 1) / num_pages)
+                    # Create worksheet image
+                    img_buffer = create_math_worksheet(plist, Ncol, Nrow, fontsize)
+                    worksheets.append(img_buffer)
 
-            st.session_state.worksheets = worksheets
-            st.success(f"Generated {len(worksheets)} worksheet pages!")
+                    # Update progress
+                    progress_bar.progress((page + 1) / num_pages)
 
-        except Exception as e:
-            st.error(f"Error generating worksheets: {str(e)}")
-            st.error("Please check your number pattern and question templates for syntax errors.")
+                st.session_state.worksheets = worksheets
+                st.success(f"Generated {len(worksheets)} worksheet pages!")
+
+            except Exception as e:
+                st.error(f"Error generating worksheets: {str(e)}")
+                st.error("Please check your number pattern and question templates for syntax errors.")
+    with col21:
+        if st.button("🔄 Refresh Templates"):
+            st.session_state.selected_template_name = None
+            st.rerun()
 
     # Display sample problems if worksheets exist
     if hasattr(st.session_state, "worksheets"):
