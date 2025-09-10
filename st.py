@@ -229,7 +229,7 @@ def get_next_template_number():
 
 
 for key, default in {
-    "selected_template_name": "+ Create New Template",
+    "selected_template_name": "template1",
     "template_data": None,
     "worksheets": [],
     "template_saved": False,
@@ -320,22 +320,22 @@ with st.sidebar:
             st.session_state.template_saved = True
             st.rerun()
 
-    # Delete template option
-    if (
-        st.session_state.selected_template_name
-        and st.session_state.selected_template_name != "+ Create New Template"
-        and available_templates
-    ):
-        st.subheader("⚠️ Delete Template")
-        if st.button("🗑️ Delete Current Template", help="Permanently delete this template file"):
-            try:
-                template_path = f"templates/{st.session_state.selected_template_name}.txt"
-                os.remove(template_path)
-                st.success(f"Deleted template: {st.session_state.selected_template_name}")
-                st.session_state.selected_template_name = None
-                st.rerun()
-            except Exception as e:
-                st.error(f"Error deleting template: {e}")
+    # # Delete template option
+    # if (
+    #     st.session_state.selected_template_name
+    #     and st.session_state.selected_template_name != "+ Create New Template"
+    #     and available_templates
+    # ):
+    #     st.subheader("⚠️ Delete Template")
+    #     if st.button("🗑️ Delete Current Template", help="Permanently delete this template file"):
+    #         try:
+    #             template_path = f"templates/{st.session_state.selected_template_name}.txt"
+    #             os.remove(template_path)
+    #             st.success(f"Deleted template: {st.session_state.selected_template_name}")
+    #             st.session_state.selected_template_name = None
+    #             st.rerun()
+    #         except Exception as e:
+    #             st.error(f"Error deleting template: {e}")
 
     # Input for number patterns
     num_pattern = st.text_area(
