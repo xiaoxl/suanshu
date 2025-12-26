@@ -97,8 +97,8 @@ def genqvault(qtemplates, num_pattern, N=10):
             prob = generateq(qlist[i], num_pattern)
             try:
                 ans = eval(prob)
-                if ans != int(ans):
-                    continue
+                # if ans != int(ans):
+                #     continue
                 if amin is not None:
                     if ans < amin:
                         continue
